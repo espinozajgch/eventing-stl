@@ -1,8 +1,7 @@
 ![marcet](assets/images/marcet.png)
 
-# PROYECTO MARCET
+# Proyecto MARCET
 
-## Descripción
 El Proyecto MARCET tiene como objetivo la creación de una **base de datos centralizada** para la gestión y análisis de datos sobre el rendimiento de jugadores en el ámbito deportivo. Se busca profesionalizar el uso de datos para mejorar la toma de decisiones, optimizar entrenamientos y fomentar una cultura digital basada en análisis objetivos.
 
 ## Características Clave
