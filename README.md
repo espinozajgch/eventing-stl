@@ -6,9 +6,8 @@ El Proyecto MARCET tiene como objetivo la creación de una **base de datos centr
 
 ## Características Clave
 - **Base de Datos Centralizada**: Unificación de información sobre historial de lesiones, composición corporal y valoraciones condicionales.
-- **Automatización de Informes**: Generación de reportes estandarizados en PDF y dashboards interactivos.
 - **Optimización del Rendimiento**: Análisis de datos para mejorar la planificación de entrenamientos y la gestión del talento.
-- **Tecnología y Seguridad**: Integración de herramientas como Power BI/Tableau, dispositivos de monitoreo (GPS) y protocolos de seguridad.
+- **Automatización de Informes**: Generación de reportes estandarizados en PDF y dashboards interactivos.
 
 ## Metodología
 El proyecto sigue el modelo **CRISP-DM**, con fases de:
@@ -25,4 +24,3 @@ Para colaborar en el proyecto, sigue las mejores prácticas de Git y envía **pu
 
 ---
 **Nota:** Para más detalles sobre la arquitectura y tecnologías utilizadas, revisa la documentación completa en este repositorio.
-
