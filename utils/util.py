@@ -4,6 +4,71 @@ from fpdf import FPDF
 import numpy as np
 import requests
 
+default_reload_time= "10m"
+
+def getDatos(conn):
+    df = conn.read(worksheet="DATOS", ttl=default_reload_time)
+    df = df.iloc[:, 2:] ##Elimina las primeras 2 columnas del DataFrame df2, manteniendo el resto.
+    df.drop(columns=['BANDERA','FOTO PERFIL'],inplace=True)
+    df = df.reset_index(drop=True)  # Reinicia los índices
+    df['EDAD'] = df['EDAD'].fillna(0).astype(int).astype(str)
+    df["NACIONALIDAD"] = df["NACIONALIDAD"].astype(str).str.replace(",", ".", regex=False).str.strip()
+    df.drop_duplicates(subset=["ID"], keep="first")
+    df = df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
+    return df
+
+def getDataTest(conn):
+    df = conn.read(worksheet="DATATEST", ttl=default_reload_time)
+    df = df.reset_index(drop=True)  # Reinicia los índices
+    df.columns = df.iloc[0]  # Usa la primera fila como nombres de columna
+    df = df[1:]  # Elimina la fila de encabezado original
+    df = df.reset_index(drop=True)  # Reinicia los índices
+    #df = df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
+    return df
+
+def getJoinedDataFrame(conn):
+    df_datos = getDatos(conn)
+    df_data_test = getDataTest(conn)
+
+    # Verificar si alguno de los DataFrames está vacío
+    if df_datos.empty or df_data_test.empty:
+        return pd.DataFrame()  # Retornar DataFrame vacío si alguno de los dos está vacío
+
+    # Realizar el merge asegurando que las claves de unión existen en ambos DataFrames
+    common_columns = ['ID', 'JUGADOR', 'CATEGORIA', 'EQUIPO']
+    if not all(col in df_datos.columns and col in df_data_test.columns for col in common_columns):
+        return pd.DataFrame()  # Si faltan columnas clave, retornar vacío
+
+    df_unido = pd.merge(df_datos, df_data_test, on=common_columns, how="inner")
+
+    # Verificar si el DataFrame unido quedó vacío
+    if df_unido.empty:
+        return df_unido
+
+    # Convertir la columna de fecha asegurando el formato correcto
+    df_unido["FECHA REGISTRO"] = pd.to_datetime(df_unido["FECHA REGISTRO"], errors='coerce', dayfirst=True)
+
+    # Eliminar filas con fechas inválidas
+    df_unido = df_unido.dropna(subset=["FECHA REGISTRO"])
+
+    # Extraer año y mes
+    df_unido["anio"] = df_unido["FECHA REGISTRO"].dt.year.astype(str)
+    df_unido["mes"] = df_unido["FECHA REGISTRO"].dt.month.astype(str)
+
+    # Ordenar por fecha de más reciente a más antigua
+    df_unido = df_unido.sort_values(by="FECHA REGISTRO", ascending=False)
+
+    # Convertir la fecha a string en formato dd/mm/yyyy
+    df_unido["FECHA REGISTRO"] = df_unido["FECHA REGISTRO"].dt.strftime("%d/%m/%Y")
+
+    # Reemplazar valores nulos o 'None' por 0
+    df_unido = df_unido.fillna(0).replace("None", 0)
+
+    # Eliminar filas donde todos los valores son 0
+    df_unido = df_unido.loc[:, (df_unido != 0).any(axis=0)]
+
+    return df_unido
+
 def generar_pdf():
     pdf = FPDF()
     pdf.add_page()
@@ -99,57 +164,6 @@ def generateFilters(df):
 
     return df_filtrado
 
-def getDatos(conn):
-    df = conn.read(worksheet="DATOS", ttl="10m")
-    df = df.iloc[:, 2:] ##Elimina las primeras 2 columnas del DataFrame df2, manteniendo el resto.
-    df.drop(columns=['BANDERA','FOTO PERFIL'],inplace=True)
-    df = df.reset_index(drop=True)  # Reinicia los índices
-    df['EDAD'] = df['EDAD'].fillna(0).astype(int).astype(str)
-    df["NACIONALIDAD"] = df["NACIONALIDAD"].astype(str).str.replace(",", ".", regex=False).str.strip()
-
-    return df
-
-def getDataTest(conn):
-    df = conn.read(worksheet="DATATEST", ttl="10m")
-    df = df.reset_index(drop=True)  # Reinicia los índices
-    df.columns = df.iloc[0]  # Usa la primera fila como nombres de columna
-    df = df[1:]  # Elimina la fila de encabezado original
-    df = df.reset_index(drop=True)  # Reinicia los índices
-
-    return df
-
-def getJoinedDataFrame(conn):
-    df_datos = getDatos(conn)
-    df_data_test = getDataTest(conn)
-
-    #st.dataframe(df_data_test)
-
-    #df = conn.read(worksheet="DATATEST", ttl="10m")
-    #df = df.reset_index(drop=True)  # Reinicia los índices
-    #df.columns = df.iloc[0]  # Usa la primera fila como nombres de columna
-    #df = df[1:]  # Elimina la fila de encabezado original
-    #df = df.reset_index(drop=True)  # Reinicia los índices
-
-    df_unido = pd.merge(df_datos, df_data_test, on=['ID','JUGADOR','CATEGORIA','EQUIPO'], how="inner")
-
-    df_unido["FECHA REGISTRO"] = pd.to_datetime(df_unido["FECHA REGISTRO"], dayfirst=True)
-    df_unido["anio"] = df_unido["FECHA REGISTRO"].dt.year.astype(str)
-    df_unido["mes"] = df_unido["FECHA REGISTRO"].dt.month.astype(str)
-    
-    df_unido["FECHA REGISTRO"] = pd.to_datetime(df_unido["FECHA REGISTRO"], dayfirst=True)
-
-    # Ordenar por fecha de más reciente a más antigua
-    df_unido = df_unido.sort_values(by="FECHA REGISTRO", ascending=False)
-
-    # Convertir de nuevo a string si es necesario
-    df_unido["FECHA REGISTRO"] = df_unido["FECHA REGISTRO"].dt.strftime("%d/%m/%Y")
-
-    df_unido = df_unido.fillna(0).replace("None", 0)
-    df_unido = df_unido[(df_unido != 0).any(axis=1)]  # Elimina filas donde todos los valores son 0
-    #df_unido['EDAD'] = df_unido['EDAD'].fillna(0).astype(int).astype(str)
-
-    return df_unido
-
 def get_photo(url):
     try:
         response = requests.get(url)
@@ -178,38 +192,29 @@ def categorizar_imc(valor):
         return "Obesidad"
 
 def color_categorias(val):
-    if val == "Bajo peso":
-        return "background-color: lightblue"
-    elif val == "Normal":
-        return "background-color: lightgreen"
-    elif val == "Sobrepeso":
-        return "background-color: yellow"
-    elif val == "Obesidad":
-        return "background-color: red"
-    elif val == "Saludable":
-        return "background-color: lightgreen"
-    elif val == "No saludable":
-        return "background-color: orange"
-    return ""
-
-def categorizar_imc(valor):
-    if valor < 18.5:
-        return "<span style='color: blue'>Bajo peso</span>"
-    elif 18.5 <= valor < 24.9:
-        return "<span style='color: green'>Normal</span>"
-    elif 25 <= valor < 29.9:
-        return "<span style='color: orange'>Sobrepeso</span>"
-    else:
-        return "<span style='color: red'>Obesidad</span>"
-
-def categorizar_grasa(porcentaje_grasa):
-    if porcentaje_grasa is None:
-        return "No disponible"
-    elif porcentaje_grasa < 20:
-        return "<span style='color: green'>Saludable</span>"
-    else:
-        return "<span style='color: orange'>No saludable</span>"
-
+    color_mapping = {
+        "Bajo peso": 0.2,  # Más cercano a rojo
+        "Normal": 0.8,  # Más cercano a verde
+        "Sobrepeso": 0.5,  # Amarillo
+        "Obesidad": 0.1,  # Rojo fuerte
+        "Saludable": 0.8,  # Verde
+        "No saludable": 0.3  # Naranja/rojo
+    }
+    
+    # Si el valor no está en el diccionario, devolver sin formato
+    if val not in color_mapping:
+        return ""
+    
+    # Normalizar el color en el rango de 0 (rojo) a 1 (verde)
+    normalized = color_mapping[val]
+    
+    # Interpolar colores
+    r = int(255 * (1 - normalized))  # Rojo disminuye con mayor valor
+    g = int(255 * normalized)  # Verde aumenta con mayor valor
+    b = 0  # Azul en 0 para tonos cálidos
+    opacity = 0.4  # Opacidad fija
+    
+    return f'background-color: rgba({r}, {g}, {b}, {opacity})'
 
 def aplicar_semaforo(df, exclude_columns=["FECHA REGISTRO"]):
     """
@@ -256,7 +261,148 @@ def aplicar_semaforo(df, exclude_columns=["FECHA REGISTRO"]):
         return f'background-color: rgba({r}, {g}, {b}, {opacity})'
 
     # Aplicar la función a todas las columnas excepto las excluidas
-    return df.style.apply(lambda x: [semaforo(val, x.name) for val in x], axis=0)
+    styled_df =  df.style.apply(lambda x: [semaforo(val, x.name) for val in x], axis=0)
+
+    # Aplicar formato de dos decimales a todas las columnas numéricas no excluidas
+    numeric_columns = [col for col in df.select_dtypes(include=[np.number]).columns if col not in exclude_columns]
+    styled_df = styled_df.format({col: "{:.2f}" for col in numeric_columns})
+
+    return styled_df            
+
+
+def contar_jugadores_por_categoria(df):
+    """
+    Retorna un DataFrame con las categorías como columnas y la cantidad de jugadores únicos en cada una.
+
+    Parámetros:
+    df : pd.DataFrame -> DataFrame con la información de los jugadores, debe contener la columna 'CATEGORIA' y 'JUGADOR'.
+
+    Retorna:
+    pd.DataFrame -> DataFrame con las categorías como columnas y la cantidad de jugadores por categoría.
+    """
+    # Contar jugadores únicos por categoría
+    jugadores_por_categoria = df.groupby("CATEGORIA")["JUGADOR"].nunique()
+
+    # Convertir a DataFrame con categorías como columnas
+    resultado = jugadores_por_categoria.to_frame().T
+
+    return resultado
+    
+def resumen_sesiones(df, total_jugadores):
+    """
+    Calcula la cantidad de sesiones en el último mes, la asistencia promedio en la última sesión,
+    la cantidad de jugadores en la última sesión y la fecha de la última sesión.
+
+    Parámetros:
+    df : pd.DataFrame -> DataFrame con los registros de sesiones.
+    total_jugadores : int -> Número total de jugadores posibles a asistir.
+
+    Retorna:
+    pd.DataFrame -> Resumen de sesiones en el último mes y última sesión.
+    """
+
+    # Verificar si el DataFrame está vacío
+    if df.empty or "FECHA REGISTRO" not in df or "ID" not in df:
+        return pd.DataFrame({"TSUM": [0], "APUS": [0], "JUS": [0], "FUS": [0]})
+
+    # Convertir FECHA REGISTRO a datetime
+    df["FECHA REGISTRO"] = pd.to_datetime(df["FECHA REGISTRO"], dayfirst=True, errors='coerce')
+
+    # Verificar si después de la conversión quedan fechas válidas
+    if df["FECHA REGISTRO"].isna().all():
+        return pd.DataFrame({"TSUM": [0], "APUS": [0], "JUS": [0], "FUS": [0]})
+
+    # Última fecha de sesión válida
+    ultima_fecha = df["FECHA REGISTRO"].max()
+
+    un_mes_atras = ultima_fecha - pd.DateOffset(months=1)
+    df_ultimo_mes = df[df["FECHA REGISTRO"] >= un_mes_atras]
+
+    # Contar sesiones únicas (jugadores diferentes por fecha)
+    sesiones_ultimo_mes = df_ultimo_mes.groupby("FECHA REGISTRO")["ID"].nunique().sum()
+
+    # Jugadores en la última sesión
+    jugadores_ultima_sesion = df[df["FECHA REGISTRO"] == ultima_fecha]["ID"].nunique()
+
+    # Asistencia promedio en la última sesión
+    asistencia_promedio = jugadores_ultima_sesion / total_jugadores if total_jugadores > 0 else 0
+
+    # Crear DataFrame con resultados
+    resumen_df = pd.DataFrame({
+        "TSUM": [sesiones_ultimo_mes],
+        "APUS": [asistencia_promedio],
+        "JUS": [jugadores_ultima_sesion],
+        "FUS": [ultima_fecha]
+    })
+
+    return resumen_df
+
+
+import pandas as pd
+
+def sesiones_por_test(df):
+    """
+    Cuenta la cantidad de sesiones por jugador y por tipo de test.
+
+    Parámetros:
+    df : pd.DataFrame -> DataFrame con los registros de sesiones.
+
+    Retorna:
+    pd.DataFrame -> Cantidad de sesiones por jugador y tipo de test.
+    """
+
+    # Verificar si el DataFrame está vacío
+    if df.empty:
+        return pd.DataFrame()  # Retornar DataFrame vacío si no hay datos
+
+    # Lista de columnas asociadas a cada test
+    test_categorias = {
+        "ANTROPOMETRÍA": ["ALTURA", "PESO", "MG [KG]", "GRASA (%)"],
+        "AGILIDAD 505": ["505-DOM [SEG]", "505-ND [SEG]"],
+        "SPRINT LINEAL": [
+            "TOTAL 40M [SEG]", "TIEMPO 0-5M [SEG]", "VEL 0-5M [M/S]",
+            "TIEMPO 5-20M [SEG]", "VEL 5-20M [M/S]", "TIEMPO 20-40M [SEG]", "VEL 20-40M [M/S]"
+        ],
+        "CMJ": ["CMJ [cm]", "CMJ [W]"],
+        "YO-YO": ["TEST", "SPEED [km/h]", "ACCUMULATED SHUTTLE DISTANCE [m]"],
+        "RSA": ["MEDIDA EN TIEMPO (SEG)", "VELOCIDAD (M*SEG)"]
+    }
+
+    # Verificar que las columnas esenciales existen
+    required_columns = {"ID", "JUGADOR", "FECHA REGISTRO"}
+    if not required_columns.issubset(df.columns):
+        return pd.DataFrame()  # Retornar vacío si faltan columnas clave
+
+    # Convertir FECHA REGISTRO a datetime con manejo de errores
+    df["FECHA REGISTRO"] = pd.to_datetime(df["FECHA REGISTRO"], errors='coerce', dayfirst=True)
+
+    # Eliminar filas con FECHA REGISTRO inválida
+    df = df.dropna(subset=["FECHA REGISTRO"])
+
+    # Crear un diccionario para contar sesiones por test
+    sesiones_dict = {"ID": [], "JUGADOR": []}
+    
+    for test in test_categorias:
+        sesiones_dict[test] = []
+
+    # Agrupar por jugador y contar sesiones por test
+    for (jugador_id, jugador_nombre), datos in df.groupby(["ID", "JUGADOR"]):
+        sesiones_dict["ID"].append(jugador_id)
+        sesiones_dict["JUGADOR"].append(jugador_nombre)
+
+        for test, columnas in test_categorias.items():
+            # Filtrar solo las columnas que existen en el DataFrame para evitar errores
+            columnas_validas = [col for col in columnas if col in df.columns]
+
+            if columnas_validas:
+                sesiones_dict[test].append(datos.dropna(subset=columnas_validas)["FECHA REGISTRO"].nunique())
+            else:
+                sesiones_dict[test].append(0)  # Si no hay columnas válidas, asignar 0
+
+    # Crear DataFrame final
+    sesiones_df = pd.DataFrame(sesiones_dict)
+
+    return sesiones_df
 
 
 def obtener_bandera(pais):
