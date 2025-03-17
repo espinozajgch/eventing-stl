@@ -14,7 +14,7 @@ def getDatos(conn):
     df['EDAD'] = df['EDAD'].fillna(0).astype(int).astype(str)
     df["NACIONALIDAD"] = df["NACIONALIDAD"].astype(str).str.replace(",", ".", regex=False).str.strip()
     df.drop_duplicates(subset=["ID"], keep="first")
-    df = df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
+    #df = df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
     return df
 
 def getDataTest(conn):
@@ -23,7 +23,6 @@ def getDataTest(conn):
     df.columns = df.iloc[0]  # Usa la primera fila como nombres de columna
     df = df[1:]  # Elimina la fila de encabezado original
     df = df.reset_index(drop=True)  # Reinicia los índices
-    #df = df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
     return df
 
 def getJoinedDataFrame(conn):
@@ -59,7 +58,7 @@ def getJoinedDataFrame(conn):
     df_unido = df_unido.sort_values(by="FECHA REGISTRO", ascending=False)
 
     # Convertir la fecha a string en formato dd/mm/yyyy
-    df_unido["FECHA REGISTRO"] = df_unido["FECHA REGISTRO"].dt.strftime("%d/%m/%Y")
+    df_unido["FECHA REGISTRO"] = df_unido["FECHA REGISTRO"].dt.strftime('%d/%m/%Y').astype(str)
 
     # Reemplazar valores nulos o 'None' por 0
     df_unido = df_unido.fillna(0).replace("None", 0)
@@ -288,54 +287,73 @@ def contar_jugadores_por_categoria(df):
 
     return resultado
     
+import pandas as pd
+
 def resumen_sesiones(df, total_jugadores):
     """
-    Calcula la cantidad de sesiones en el último mes, la asistencia promedio en la última sesión,
-    la cantidad de jugadores en la última sesión y la fecha de la última sesión.
+    Calcula la cantidad de sesiones en los dos últimos meses, la asistencia promedio en cada mes,
+    la cantidad de jugadores en la última sesión de cada mes y la fecha de la última sesión.
 
     Parámetros:
     df : pd.DataFrame -> DataFrame con los registros de sesiones.
     total_jugadores : int -> Número total de jugadores posibles a asistir.
 
     Retorna:
-    pd.DataFrame -> Resumen de sesiones en el último mes y última sesión.
+    pd.DataFrame -> Resumen de sesiones en el último mes y penúltimo mes.
     """
 
-    # Verificar si el DataFrame está vacío
+    # Verificar si el DataFrame está vacío o no tiene las columnas necesarias
     if df.empty or "FECHA REGISTRO" not in df or "ID" not in df:
-        return pd.DataFrame({"TSUM": [0], "APUS": [0], "JUS": [0], "FUS": [0]})
+        return pd.DataFrame({"MES": ["Último", "Penúltimo"], "TSUM": [0, 0], "APUS": [0, 0], "JUS": [0, 0], "FUS": [None, None]})
 
     # Convertir FECHA REGISTRO a datetime
     df["FECHA REGISTRO"] = pd.to_datetime(df["FECHA REGISTRO"], dayfirst=True, errors='coerce')
 
-    # Verificar si después de la conversión quedan fechas válidas
+    # Verificar si hay fechas válidas
     if df["FECHA REGISTRO"].isna().all():
-        return pd.DataFrame({"TSUM": [0], "APUS": [0], "JUS": [0], "FUS": [0]})
+        return pd.DataFrame({"MES": ["Último", "Penúltimo"], "TSUM": [0, 0], "APUS": [0, 0], "JUS": [0, 0], "FUS": [None, None]})
 
     # Última fecha de sesión válida
     ultima_fecha = df["FECHA REGISTRO"].max()
 
+    # Definir los rangos de tiempo
     un_mes_atras = ultima_fecha - pd.DateOffset(months=1)
+    dos_meses_atras = ultima_fecha - pd.DateOffset(months=2)
+
     df_ultimo_mes = df[df["FECHA REGISTRO"] >= un_mes_atras]
+    df_penultimo_mes = df[(df["FECHA REGISTRO"] >= dos_meses_atras) & (df["FECHA REGISTRO"] < un_mes_atras)]
 
-    # Contar sesiones únicas (jugadores diferentes por fecha)
-    sesiones_ultimo_mes = df_ultimo_mes.groupby("FECHA REGISTRO")["ID"].nunique().sum()
+    def calcular_resumen(df_periodo, nombre_mes):
+        if df_periodo.empty:
+            return {"MES": nombre_mes, "TSUM": 0, "APUS": 0, "JUS": 0, "FUS": None}
+        
+        # Contar sesiones únicas
+        sesiones_mes = df_periodo.groupby("FECHA REGISTRO")["ID"].nunique().sum()
+        
+        # Última sesión del periodo
+        ultima_fecha_periodo = df_periodo["FECHA REGISTRO"].max()
+        jugadores_ultima_sesion = df[df["FECHA REGISTRO"] == ultima_fecha_periodo]["ID"].nunique()
 
-    # Jugadores en la última sesión
-    jugadores_ultima_sesion = df[df["FECHA REGISTRO"] == ultima_fecha]["ID"].nunique()
+        # Calcular asistencia promedio
+        asistencia_promedio = jugadores_ultima_sesion / total_jugadores if total_jugadores > 0 else 0
 
-    # Asistencia promedio en la última sesión
-    asistencia_promedio = jugadores_ultima_sesion / total_jugadores if total_jugadores > 0 else 0
+        return {
+            "MES": nombre_mes,
+            "TSUM": sesiones_mes,
+            "APUS": asistencia_promedio,
+            "JUS": jugadores_ultima_sesion,
+            "FUS": ultima_fecha_periodo.strftime('%d/%m/%Y') if pd.notna(ultima_fecha_periodo) else None
+        }
 
-    # Crear DataFrame con resultados
-    resumen_df = pd.DataFrame({
-        "TSUM": [sesiones_ultimo_mes],
-        "APUS": [asistencia_promedio],
-        "JUS": [jugadores_ultima_sesion],
-        "FUS": [ultima_fecha]
-    })
+    # Calcular resumen para ambos meses
+    resumen_ultimo_mes = calcular_resumen(df_ultimo_mes, "Último")
+    resumen_penultimo_mes = calcular_resumen(df_penultimo_mes, "Penúltimo")
+
+    # Crear DataFrame con los resultados
+    resumen_df = pd.DataFrame([resumen_ultimo_mes, resumen_penultimo_mes])
 
     return resumen_df
+
 
 
 import pandas as pd

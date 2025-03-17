@@ -27,7 +27,7 @@ df_sesiones = util.resumen_sesiones(df_joined, total_jugadores)
 #########################################################
 
 st.header("Bienvenido")
-
+#st.dataframe(df_sesiones)
 col1, col2, col3, col4, col5 = st.columns(5)
 
 with col1:
@@ -35,28 +35,34 @@ with col1:
 
 with col2:
     act = df_sesiones["TSUM"].iloc[0]
-    ant = 0
-    variacion = 1
-    st.metric(f"Total Asistencia (Mes)",f'{act}')
+    ant = df_sesiones["TSUM"].iloc[1]
+    variacion = act - ant
+    st.metric(f"Total Asistencia (Mes)",f'{act}', f'{variacion:,.2f}')
 
 with col3:
     act = df_sesiones["APUS"].iloc[0]
-    ant = 0
-    variacion = 1
-    st.metric(f"% Asistencia (Mes)",f'{act:,.3f}')
+    ant = df_sesiones["APUS"].iloc[1]
+    variacion = act - ant
+    st.metric(f"% Asistencia (Mes)",f'{act:,.3f}', f'{variacion:,.2f}')
 
 with col4:
     act = df_sesiones["JUS"].iloc[0]
-    ant = 0
-    variacion = 1
-    st.metric(f"Asistencia Ultima Sesion",f'{act}')
+    ant = df_sesiones["JUS"].iloc[1]
+    variacion = act - ant
+    st.metric(f"Asistencia Ultima Sesion",f'{act}', f'{variacion:,.2f}')
 
 with col5:
     # Mostrar la fecha si es válida
     if not df_joined.empty: 
         ultima_fecha = df_joined['FECHA REGISTRO'].iloc[0]
-        if ultima_fecha is not None and pd.notna(ultima_fecha):
-            st.metric("Última Sesión", ultima_fecha)
+        if isinstance(ultima_fecha, pd.Timestamp):
+            ultima_fecha_str = ultima_fecha.strftime('%d/%m/%Y')
+        elif isinstance(ultima_fecha, str):
+            ultima_fecha_str = ultima_fecha  # Ya es string, no necesita conversión
+        else:
+            ultima_fecha_str = str(ultima_fecha)  # Convertir otros tipos a string
+        st.metric("Última Sesión", ultima_fecha_str)
+
     else:
         st.metric("Última Sesión", "####")
 
