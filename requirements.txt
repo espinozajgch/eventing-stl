@@ -1,2 +1,9 @@
-streamlit
-git+https://github.com/streamlit/gsheets-connection
+fpdf==1.7.2
+matplotlib==3.8.3
+numpy==2.2.4
+pandas==2.2.3
+plotly==5.9.0
+Requests==2.32.3
+seaborn==0.13.2
+st_gsheets_connection==0.1.0
+streamlit==1.42.2
