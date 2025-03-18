@@ -4,10 +4,23 @@ from fpdf import FPDF
 import numpy as np
 import requests
 
-default_reload_time= "10m"
+def get_ttl():
+    if st.session_state.get("reload_data", False):
+        default_reload_time = "0m"  # Forzar recarga
+        st.session_state["reload_data"] = False  # Resetear flag después de la recarga
+    else:
+        default_reload_time = "10m"  # Usar caché normalmente
+
+    return default_reload_time
+
+def getData(conn):
+    df_datos = getDatos(conn)
+    df_data_test = getDataTest(conn)
+
+    return df_datos, df_data_test
 
 def getDatos(conn):
-    df = conn.read(worksheet="DATOS", ttl=default_reload_time)
+    df = conn.read(worksheet="DATOS", ttl=get_ttl())
     df = df.iloc[:, 2:] ##Elimina las primeras 2 columnas del DataFrame df2, manteniendo el resto.
     df.drop(columns=['BANDERA','FOTO PERFIL'],inplace=True)
     df = df.reset_index(drop=True)  # Reinicia los índices
@@ -18,7 +31,7 @@ def getDatos(conn):
     return df
 
 def getDataTest(conn):
-    df = conn.read(worksheet="DATATEST", ttl=default_reload_time)
+    df = conn.read(worksheet="DATATEST", ttl=get_ttl())
     df = df.reset_index(drop=True)  # Reinicia los índices
     df.columns = df.iloc[0]  # Usa la primera fila como nombres de columna
     df = df[1:]  # Elimina la fila de encabezado original
@@ -26,8 +39,9 @@ def getDataTest(conn):
     return df
 
 def getJoinedDataFrame(conn):
-    df_datos = getDatos(conn)
-    df_data_test = getDataTest(conn)
+    df_datos, df_data_test = getData(conn)
+    ##df_datos = getDatos(conn, default_reload_time)
+    ##df_data_test = getDataTest(conn, default_reload_time)
 
     # Verificar si alguno de los DataFrames está vacío
     if df_datos.empty or df_data_test.empty:
