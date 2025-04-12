@@ -125,7 +125,7 @@ def generarMenu():
         #Mostramos el nombre del usuario
         #st.write(f"Hola **:blue-background[{nombre}]** ")
         # Mostramos los enlaces de páginas
-        st.page_link("inicio.py", label="Inicio", icon=":material/home:")
+        st.page_link("app.py", label="Inicio", icon=":material/home:")
         st.subheader("Tableros")
         st.page_link("pages/player.py", label="PlayerHub", icon=":material/contacts:")
         #st.page_link("pages/pagina2.py", label="Compras", icon=":material/shopping_cart:")
