@@ -115,7 +115,7 @@ def generarMenu():
         usuario (str): usuario utilizado para generar el menú
     """        
     with st.sidebar:
-        st.logo("assets/images/ucam_sdc.png", size="large")
+        st.logo("assets/images/sdc.png", size="large")
         # Cargamos la tabla de usuarios
         #dfusuarios = pd.read_csv('usuarios.csv')
         # Filtramos la tabla de usuarios
