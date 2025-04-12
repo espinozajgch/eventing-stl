@@ -108,6 +108,35 @@ def generateMenu():
         #st.page_link('pages/team.py', label="StatsLab", icon="📊")
         #st.page_link('pages/perfil.py', label="Perfil", icon="📊")
 
+def generarMenu():
+    """Genera el menú dependiendo del usuario
+
+    Args:
+        usuario (str): usuario utilizado para generar el menú
+    """        
+    with st.sidebar:
+        st.logo("assets/images/sdc.png", size="large")
+        # Cargamos la tabla de usuarios
+        #dfusuarios = pd.read_csv('usuarios.csv')
+        # Filtramos la tabla de usuarios
+        #dfUsuario =dfusuarios[(dfusuarios['usuario']==usuario)]
+        # Cargamos el nombre del usuario
+        #nombre= dfUsuario['nombre'].values[0]
+        #Mostramos el nombre del usuario
+        #st.write(f"Hola **:blue-background[{nombre}]** ")
+        # Mostramos los enlaces de páginas
+        st.page_link("inicio.py", label="Inicio", icon=":material/home:")
+        st.subheader("Tableros")
+        st.page_link("pages/player.py", label="PlayerHub", icon=":material/contacts:")
+        #st.page_link("pages/pagina2.py", label="Compras", icon=":material/shopping_cart:")
+        #st.page_link("pages/pagina3.py", label="Personal", icon=":material/group:")    
+        st.divider()
+        #st.subheader("Ajustes")
+        btnReload=st.button("Recargar Datos", type="tertiary", icon=":material/update:")
+        if btnReload:
+            st.session_state["reload_data"] = True  # Activar recarga manual
+            st.rerun()
+
 def generateFilters(df):
 
     ##anios = df["anio"].dropna().astype(str).str.strip().unique().tolist()

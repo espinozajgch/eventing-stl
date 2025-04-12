@@ -26,15 +26,15 @@ def generarMenu(usuario):
         usuario (str): usuario utilizado para generar el menú
     """        
     with st.sidebar:
-        st.logo("assets/images/marcet.png", size="large")
+        st.logo("assets/images/sdc.png", size="large")
         # Cargamos la tabla de usuarios
-        dfusuarios = pd.read_csv('usuarios.csv')
+        #dfusuarios = pd.read_csv('usuarios.csv')
         # Filtramos la tabla de usuarios
-        dfUsuario =dfusuarios[(dfusuarios['usuario']==usuario)]
+        #dfUsuario =dfusuarios[(dfusuarios['usuario']==usuario)]
         # Cargamos el nombre del usuario
-        nombre= dfUsuario['nombre'].values[0]
+        #nombre= dfUsuario['nombre'].values[0]
         #Mostramos el nombre del usuario
-        st.write(f"Hola **:blue-background[{nombre}]** ")
+        #st.write(f"Hola **:blue-background[{nombre}]** ")
         # Mostramos los enlaces de páginas
         st.page_link("inicio.py", label="Inicio", icon=":material/home:")
         st.subheader("Tableros")
