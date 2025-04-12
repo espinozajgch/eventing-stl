@@ -1,23 +1,56 @@
-![marcet](assets/images/marcet.png)
+![sport data campus](assets/images/ucam_sdc.png)
 
-# Proyecto MARCET
+# 📊 Comparación de Proveedores SPADL en Fútbol
 
-El Proyecto MARCET tiene como objetivo la creación de una **base de datos centralizada** para la gestión y análisis de datos sobre el rendimiento de jugadores en el ámbito deportivo. Se busca profesionalizar el uso de datos para mejorar la toma de decisiones, optimizar entrenamientos y fomentar una cultura digital basada en análisis objetivos.
+Este proyecto forma parte del trabajo final del Máster en Big Data aplicado al fútbol (PFM), y tiene como objetivo comparar la calidad, cobertura y aplicabilidad de los datos de eventos futbolísticos proporcionados por **Opta**, **StatsBomb** y **Wyscout**, utilizando el modelo de estandarización **SPADL**.
 
-## Características Clave
-- **Base de Datos Centralizada**: Unificación de información sobre historial de lesiones, composición corporal y valoraciones condicionales.
-- **Optimización del Rendimiento**: Análisis de datos para mejorar la planificación de entrenamientos y la gestión del talento.
-- **Automatización de Informes**: Generación de reportes estandarizados en PDF y dashboards interactivos.
+---
 
-## Metodología
-El proyecto sigue el modelo **CRISP-DM**, con fases de:
-1. **Comprensión del negocio y de los datos**.
-2. **Preparación y limpieza de datos**.
-3. **Modelado y análisis** para identificar patrones.
-4. **Evaluación y despliegue** de herramientas para mejorar la toma de decisiones.
+## 🧠 Funcionalidades
 
-## Cronograma
-El desarrollo se divide en **5 fases**, desde la planificación y recolección de datos hasta la generación de informes y la presentación final.
+La aplicación desarrollada en **Streamlit** permite:
+
+- 🔍 Selección interactiva del proveedor y tipo de acción SPADL.
+- ⚽ Visualización geoespacial de acciones:
+  - Mapa de calor.
+  - Mapa de pases.
+- 📈 Consulta de métricas generales por acción.
+- 🧭 Exploración del comportamiento de los datos en el campo por proveedor.
+
+---
+
+## 📁 Estructura del proyecto
+- **data/**: Contiene los archivos originales de eventos (JSON/XML) por proveedor.
+- **notebooks/**: Scripts de análisis exploratorio, visualizaciones y conversión SPADL.
+- **streamlit_app/**: Aplicación interactiva para visualización comparativa.
+- **docs/**: Documentación, referencias y resultados del análisis.
+- **utils/**: Conversores personalizados (`OptaConverter`, `StatsBombConverter`, `WyscoutConverter`) y funciones auxiliares.
+
+## 🧠 Metodología
+
+Se ha seguido una combinación entre **CRISP-DM** y **evaluación de fiabilidad de datos**. Cada evento se convierte al formato SPADL, que define 21 tipos de acciones estándar. Los datos se normalizan, limpian y analizan estadísticamente para evaluar:
+
+- Cobertura de eventos.
+- Distribución y frecuencia por tipo de acción.
+- Coherencia espacial y granularidad temporal.
+- Aplicabilidad en análisis de rendimiento y scouting.
+
+## ▶️ Cómo ejecutar
+
+1. Instala las dependencias:
+
+```bash
+pip install -r requirements.txt
+```
+2. Ejecuta la aplicación:
+
+```bash
+streamlit run streamlit_app.py
+```
+
+## 👤 Autor
+
+[Tu nombre aquí]Trabajo Final de Máster en Big Data aplicado al Fútbol[GitHub | LinkedIn | Portfolio] (opcional)
 
 ## Contribución
 Para colaborar en el proyecto, sigue las mejores prácticas de Git y envía **pull requests** con mejoras o nuevas funcionalidades.
