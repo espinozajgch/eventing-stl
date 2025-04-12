@@ -1,6 +1,4 @@
-![marcet](assets/images/sdc.png)
-
-# Proyecto MARCET
+![sport data campus](assets/images/sdc.png)
 
 # 📊 Comparación de Proveedores SPADL en Fútbol
 
