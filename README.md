@@ -1,4 +1,4 @@
-![sport data campus](assets/images/logo_ucan_sdc.png)
+![sport data campus](assets/images/ucam_sdc.png.png)
 
 # 📊 Comparación de Proveedores SPADL en Fútbol
 
