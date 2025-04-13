@@ -1,6 +1,7 @@
 fpdf==1.7.2
+login==0.0.6
 matplotlib==3.8.3
-numpy>=1.21, <2.0
+numpy==2.2.4
 pandas==2.2.3
 plotly==5.9.0
 Requests==2.32.3
