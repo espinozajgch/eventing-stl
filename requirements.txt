@@ -1,10 +1,7 @@
-fpdf==1.7.2
-login==0.0.6
 matplotlib==3.8.3
+mplsoccer==1.4.0
 numpy==2.2.4
 pandas==2.2.3
 plotly==5.9.0
-Requests==2.32.3
 seaborn==0.13.2
-st_gsheets_connection==0.1.0
 streamlit==1.42.2
