@@ -32,7 +32,7 @@ df_sb, df_op, df_ws, df_all = connection.get_df()
 col1, col2 = st.columns([1.2,2])
 with col1:
     with st.container(height=450, border=False):
-        graphics.plot_spadl_action_heatmap(df_sb, df_op, df_ws)
+        graphics.plot_spadl_action_heatmap(df_all)
 with col2:
     st.markdown("**Resumen de Acciones SPADL**")
     st.dataframe(df_all.sample(n=20, random_state=42))

@@ -24,7 +24,7 @@ if 'StartTime' in df_datos_filtrado.columns:
     min_sec = int(df_datos_filtrado['StartTime'].min())
     max_sec = int(df_datos_filtrado['StartTime'].max())
     min_min = min_sec // 60
-    max_min = min(90, max_sec // 60 + 1)
+    max_min = (max_sec // 60) + 1
 
     min_selected, max_selected = st.slider(
         "RANGO DE MINUTOS",
@@ -39,10 +39,16 @@ if 'StartTime' in df_datos_filtrado.columns:
         (df_datos_filtrado['StartTime'] < max_selected * 60)
     ]
 
-tab1, tab2= st.tabs(["GRAFICO", "TABLA"])
+tab1, tab2 = st.tabs(["GRÁFICOS", "TABLAS"])
 with tab1:
     st.markdown("**Distribución Espacial de Acciones**")
     graphics.plot_all_action_symbols(df_filtered)
 with tab2:
-    st.markdown("**Tabla de Acciones SPADL**")
-    st.dataframe(df_filtered)
+    col1, col2 = st.columns([1.1,2])
+    with col1:
+        #with st.container(height=450, border=False):
+        graphics.plot_spadl_action_heatmap(df_filtered)
+    with col2:
+        st.markdown("**Tabla de Acciones SPADL**")
+        st.dataframe(df_filtered)
+
