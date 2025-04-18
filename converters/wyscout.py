@@ -58,7 +58,20 @@ class WyscoutConverter(BaseProviderConverter):
         end = [pos[1]["x"], pos[1]["y"]] if len(pos) > 1 else loc
         start_x, start_y = loc[0], loc[1]
         end_x, end_y = end[0], end[1]
-        time = event.get("eventSec", 0)
+        raw_time = event.get("eventSec", 0)
+        period = event.get("matchPeriod", "1H")
+        
+        # Mapeo de períodos a segundos de offset
+        period_offsets = {
+            "1H": 0,
+            "2H": 45 * 60,
+            "E1": 90 * 60,
+            "E2": 105 * 60,
+            "P": 120 * 60
+        }
+
+        offset = period_offsets.get(period, 0)
+        time = round(raw_time + offset, 2)
 
         player_id = str(event.get("playerId"))
         team_id = str(event.get("teamId"))
