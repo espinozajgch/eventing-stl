@@ -93,25 +93,25 @@ def plot_mean_actions(summary):
     # Mostrar en Streamlit
     st.plotly_chart(fig, use_container_width=True)
 
-def plot_spadl_action_heatmap(df_sb, df_op, df_ws):
+def plot_spadl_action_heatmap(df_all):
+    # Validar que la columna Provider existe
+    if 'Provider' not in df_all.columns:
+        st.error("El DataFrame no contiene la columna 'Provider'")
+        return
+
     # Calcular frecuencia por proveedor
-    freq_sb = df_sb['ActionType'].value_counts()
-    freq_op = df_op['ActionType'].value_counts()
-    freq_ws = df_ws['ActionType'].value_counts()
+    freq = df_all.groupby('Provider')['ActionType'].value_counts().unstack(fill_value=0).T
 
-    df_freq = pd.DataFrame({
-        "StatsBomb": freq_sb,
-        "Opta": freq_op,
-        "Wyscout": freq_ws
-    }).fillna(0).astype(int)
+    # Reordenar columnas si están presentes
+    expected_order = ["opta", "wyscout", "statsbomb"]
+    freq = freq[[col for col in expected_order if col in freq.columns]]
 
-    # Ordenar columnas y filas
-    df_freq = df_freq[["Opta", "Wyscout", "StatsBomb"]]
-    df_freq = df_freq.sort_values(by=["Opta", "Wyscout", "StatsBomb"], ascending=False)
+    # Ordenar por suma total para visualización más clara
+    freq = freq.loc[freq.sum(axis=1).sort_values(ascending=False).index]
 
-    # Mostrar tabla con semáforo en Streamlit
+    # Mostrar tabla con estilo
     st.markdown("**Acciones SPADL por proveedor**")
-    st.dataframe(df_freq.style.background_gradient(cmap="RdYlGn", axis=1), height=500)
+    st.dataframe(freq.style.background_gradient(cmap="RdYlGn", axis=1))
 
 def plot_action_distribution_per_provider(df, provider_name):
     

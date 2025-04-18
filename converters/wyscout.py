@@ -12,43 +12,47 @@ class WyscoutConverter(BaseProviderConverter):
         tags = [tag["id"] for tag in event.get("tags", [])]
 
         action = None
-        if eid == 8:  # Pass
-            if sub == "cross":
-                action = "cross"
-            elif sub == "throw in":
-                action = "throw_in"
-            elif sub == "free kick":
-                action = "freekick_short"
-            elif sub == "corner":
-                action = "corner_crossed" if 302 in tags else "corner_short"
-            elif sub == "simple pass":
-                action = "bad_touch" if 1802 in tags else "pass"
-            else:
-                action = "pass"
-        elif eid == 3:
-            if sub == "penalty":
-                action = "penalty_shot"
-            elif sub == "free kick shot":
-                action = "freekick_shot"
-            elif sub == "free kick cross":
-                action = "freekick_crossed"
-            else:
-                action = "freekick_short"
-        elif eid == 10:
-            action = "shot"
-        elif eid == 2:
-            action = "foul"
-        elif eid == 5:
+        
+        # Detectar intercepción por tag 1401 antes de cualquier otra lógica
+        if 1401 in tags:
             action = "interception"
-        elif eid == 7:
-            action = "clearance"
-        elif eid == 9:
-            action = "keeper_save"
-        elif eid == 1:
-            if sub == "ground attacking duel" and any(t in tags for t in [503, 504]):
-                action = "take_on"
-            elif sub == "ground defending duel" and 1601 in tags:
-                action = "tackle"
+
+        if action is None:
+            if eid == 8:  # Pass
+                if sub == "cross":
+                    action = "cross"
+                elif sub == "simple pass":
+                    action = "bad_touch" if 1802 in tags else "pass"
+                else:
+                    action = "pass"
+            elif eid == 3:
+                if sub == "penalty":
+                    action = "penalty_shot"
+                elif sub == "throw in":
+                    action = "throw_in"
+                elif sub == "free kick":
+                    action = "freekick_short"
+                elif sub == "corner":
+                    action = "corner_crossed" if 302 in tags else "corner_short"
+                elif sub == "free kick shot":
+                    action = "freekick_shot"
+                elif sub == "free kick cross":
+                    action = "freekick_crossed"
+                else:
+                    action = "freekick_short"
+            elif eid == 10:
+                action = "shot"
+            elif eid == 2:
+                action = "foul"
+            elif eid == 7:
+                action = "clearance"
+            elif eid == 9:
+                action = "keeper_save"
+            elif eid == 1:
+                if sub == "ground attacking duel" and any(t in tags for t in [503, 504]):
+                    action = "take_on"
+                elif sub == "ground defending duel" and 1601 in tags:
+                    action = "tackle"
 
         if action is None:
             return None

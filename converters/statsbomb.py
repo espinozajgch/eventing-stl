@@ -70,12 +70,6 @@ class StatsBombConverter(BaseProviderConverter):
         loc = event.get("location", [0, 0])
         end = event.get(event["type"]["name"].lower(), {}).get("end_location", loc)
         
-        #start_x, start_y = self.normalize_coords(loc[0], loc[1], 120, 80)
-        #end_x, end_y = self.normalize_coords(end[0], end[1], 120, 80)
-
-        #start_x, start_y = self.normalize_coords(loc[0], loc[1], provider="statsbomb")
-        #end_x, end_y = self.normalize_coords(end[0], end[1], provider="statsbomb")
-
         start_x, start_y = loc[0], loc[1]
         end_x, end_y = end[0], end[1]
         
