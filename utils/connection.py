@@ -10,16 +10,17 @@ from utils.loaders import load_wyscout_events
 from utils import mappers
 
 def get_df():
+    # # Barcelona - Real Madrid, 2 - 2 - May 6, 2018 Temporada 17/18
     # Rutas a los archivos
-    statsbomb_path = Path("data/statsbomb/3773497.json") #3773497
-    wyscout_path = Path("data/wyscout/partido_2565907.json") #2565907
-    opta_path = Path("data/opta/f24_2445113.xml") #Madrid - Barcelona
+    statsbomb_path = Path("data/statsbomb/9924.json")
+    wyscout_path = Path("data/wyscout/2565907.json")
+    opta_path = Path("data/opta/f24-23-2017-943158-eventdetails.xml")
 
     # Crear convertidor
     converter = SPADLConverter()
 
     # Leer mappings
-    f40_path = Path("data/opta/F40_23.xml")
+    f40_path = Path("data/opta/srml-23-2017-squads.xml")
     team_map, player_map = mappers.load_opta_mappings(f40_path)
 
     teams_path = Path("data/wyscout/teams.json")
