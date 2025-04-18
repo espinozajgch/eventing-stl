@@ -17,6 +17,8 @@ def generarMenu():
         st.page_link("pages/scout.py", label="ScoutingHub", icon=":material/contacts:")
         st.page_link("pages/advanced_stats.py", label="Advanced Stats", icon=":material/monitoring:")
 
+import streamlit as st
+
 def generate_spadl_filters(df):
     default_option = "Todos"
     df_filtered = df.copy()
@@ -24,35 +26,44 @@ def generate_spadl_filters(df):
     # Columnas Streamlit: proveedor, equipo, jugador, acción
     provider_col, team_col, player_col, action_col = st.columns(4)
 
-# --- FILTRO POR PROVEEDOR ---
+    # --- FILTRO POR PROVEEDOR ---
     with provider_col:
-        provider_options = df[['Provider']].drop_duplicates().dropna()['Provider'].astype(str).str.strip().sort_values().tolist()
-        provider = st.selectbox("PROVEEDOR", options=[default_option] + provider_options, index=0)
+        provider_options = df['Provider'].dropna().astype(str).str.strip().sort_values().unique().tolist()
+        prev_provider = st.session_state.get("selected_provider", default_option)
+        provider = st.selectbox("PROVEEDOR", options=[default_option] + provider_options, index=([default_option] + provider_options).index(prev_provider) if prev_provider in provider_options else 0)
+        st.session_state["selected_provider"] = provider
         if provider != default_option:
             df_filtered = df_filtered[df_filtered['Provider'] == provider]
 
     # --- FILTRO POR EQUIPO ---
     with team_col:
-        team_options = df_filtered[['Team']].drop_duplicates().dropna()['Team'].astype(str).str.strip().sort_values().tolist()
-        team = st.selectbox("EQUIPO", options=[default_option] + team_options, index=0)
+        team_options = df_filtered['Team'].dropna().astype(str).str.strip().sort_values().unique().tolist()
+        prev_team = st.session_state.get("selected_team", default_option)
+        team = st.selectbox("EQUIPO", options=[default_option] + team_options, index=([default_option] + team_options).index(prev_team) if prev_team in team_options else 0)
+        st.session_state["selected_team"] = team
         if team != default_option:
             df_filtered = df_filtered[df_filtered['Team'] == team]
 
     # --- FILTRO POR JUGADOR ---
     with player_col:
-        player_options = df_filtered[['Player']].drop_duplicates().dropna()['Player'].astype(str).str.strip().sort_values().tolist()
-        player = st.selectbox("JUGADOR", options=[default_option] + player_options, index=0)
+        player_options = df_filtered['Player'].dropna().astype(str).str.strip().sort_values().unique().tolist()
+        prev_player = st.session_state.get("selected_player", default_option)
+        player = st.selectbox("JUGADOR", options=[default_option] + player_options, index=([default_option] + player_options).index(prev_player) if prev_player in player_options else 0)
+        st.session_state["selected_player"] = player
         if player != default_option:
             df_filtered = df_filtered[df_filtered['Player'] == player]
 
     # --- FILTRO POR ACCIÓN ---
     with action_col:
-        action_options = df_filtered[['ActionType']].drop_duplicates().dropna()['ActionType'].astype(str).str.strip().sort_values().tolist()
-        action = st.selectbox("ACCIÓN SPADL", options=[default_option] + action_options, index=0)
+        action_options = df_filtered['ActionType'].dropna().astype(str).str.strip().sort_values().unique().tolist()
+        prev_action = st.session_state.get("selected_action", default_option)
+        action = st.selectbox("ACCIÓN SPADL", options=[default_option] + action_options, index=([default_option] + action_options).index(prev_action) if prev_action in action_options else 0)
+        st.session_state["selected_action"] = action
         if action != default_option:
             df_filtered = df_filtered[df_filtered['ActionType'] == action]
 
     return df_filtered
+
 
 def get_player_map():
     PLAYER_NAME_MAP_TO_OPTA = {
