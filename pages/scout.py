@@ -19,10 +19,30 @@ st.header(":material/contacts: :blue[ScoutingHub]", divider=True)
 
 df_datos_filtrado = util.generate_spadl_filters(df_all)
 
+ # --- FILTRO POR MINUTOS ---
+if 'StartTime' in df_datos_filtrado.columns:
+    min_sec = int(df_datos_filtrado['StartTime'].min())
+    max_sec = int(df_datos_filtrado['StartTime'].max())
+    min_min = min_sec // 60
+    max_min = min(90, max_sec // 60 + 1)
+
+    min_selected, max_selected = st.slider(
+        "RANGO DE MINUTOS",
+        min_value=0,
+        max_value=90,
+        value=(min_min, max_min),
+        step=1
+    )
+
+    df_filtered = df_datos_filtrado[
+        (df_datos_filtrado['StartTime'] >= min_selected * 60) &
+        (df_datos_filtrado['StartTime'] < max_selected * 60)
+    ]
+
 tab1, tab2= st.tabs(["GRAFICO", "TABLA"])
 with tab1:
     st.markdown("**Distribución Espacial de Acciones**")
-    graphics.plot_all_action_symbols(df_datos_filtrado)
+    graphics.plot_all_action_symbols(df_filtered)
 with tab2:
     st.markdown("**Tabla de Acciones SPADL**")
-    st.dataframe(df_datos_filtrado)
+    st.dataframe(df_filtered)
