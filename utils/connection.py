@@ -8,6 +8,7 @@ from utils.loaders import load_opta_events
 from utils.loaders import load_statsbomb_events
 from utils.loaders import load_wyscout_events
 from utils import mappers
+from utils import util
 
 def get_df():
     # # Barcelona - Real Madrid, 2 - 2 - May 6, 2018 Temporada 17/18
@@ -46,4 +47,7 @@ def get_df():
     df_ws = df_ws[df_ws['Player'] != '0']
     df_op = pd.DataFrame(spadl_op)
 
-    return df_sb, df_op, df_ws
+    df_all = pd.concat([df_sb, df_ws, df_op], ignore_index=True)
+    df_all["Player"] = df_all["Player"].replace(util.get_player_map())
+
+    return df_sb, df_op, df_ws, df_all

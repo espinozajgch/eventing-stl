@@ -16,8 +16,7 @@ st.header(":material/monitoring: :blue[StatsLab]", divider=True)
 
 util.generarMenu()
 
-df_sb, df_op, df_ws = connection.get_df()
-df_all = pd.concat([df_sb, df_ws, df_op], ignore_index=True)
+df_sb, df_op, df_ws, df_all = connection.get_df()
 
 st.markdown("**Distribución de Acciones por proveedor**")
 

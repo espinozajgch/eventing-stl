@@ -54,3 +54,102 @@ def generate_spadl_filters(df):
 
     return df_filtered
 
+def get_player_map():
+    PLAYER_NAME_MAP_TO_OPTA = {
+        # StatsBomb / Wyscout → Opta
+        "Karim Benzema": "Karim Benzema",
+        "K. Benzema": "Karim Benzema",
+
+        "Toni Kroos": "Toni Kroos",
+        "T. Kroos": "Toni Kroos",
+
+        "Sergio Ramos García": "Sergio Ramos",
+        "Sergio Ramos": "Sergio Ramos",
+
+        "Raphaël Varane": "Raphael Varane",
+        "R. Varane": "Raphael Varane",
+
+        "Keylor Navas Gamboa": "Keylor Navas",
+        "K. Navas": "Keylor Navas",
+
+        "Carlos Henrique Casimiro": "Casemiro",
+        "Casemiro": "Casemiro",
+
+        "Ivan Rakitić": "Ivan Rakitic",
+        "I. Rakitić": "Ivan Rakitic",
+
+        "Luka Modrić": "Luka Modric",
+        "L. Modrić": "Luka Modric",
+
+        "José Ignacio Fernández Iglesias": "Nacho",
+        "Nacho": "Nacho",
+
+        "Marcelo Vieira da Silva Júnior": "Marcelo",
+        "Marcelo": "Marcelo",
+
+        "Gerard Piqué Bernabéu": "Gerard Piqué",
+        "Piqué": "Gerard Piqué",
+
+        "Sergio Busquets i Burgos": "Sergio Busquets",
+        "Sergio Busquets": "Sergio Busquets",
+
+        "Andrés Iniesta Luján": "Andrés Iniesta",
+        "Iniesta": "Andrés Iniesta",
+
+        "Philippe Coutinho Correia": "Coutinho",
+        "Philippe Coutinho": "Coutinho",
+
+        "Lionel Andrés Messi Cuccittini": "Lionel Messi",
+        "L. Messi": "Lionel Messi",
+        "Lionel Messi": "Lionel Messi",
+
+        "Sergi Roberto Carnicer": "Sergi Roberto",
+        "Sergi Roberto": "Sergi Roberto",
+
+        "Samuel Yves Umtiti": "Samuel Umtiti",
+        "S. Umtiti": "Samuel Umtiti",
+
+        "Jordi Alba Ramos": "Jordi Alba",
+        "Jordi Alba": "Jordi Alba",
+
+        "Marc-André ter Stegen": "Marc-André ter Stegen",
+        "M. ter Stegen": "Marc-André ter Stegen",
+
+        "Gareth Frank Bale": "Gareth Bale",
+        "G. Bale": "Gareth Bale",
+        "Gareth Bale": "Gareth Bale",
+
+        "Luis Alberto Suárez Díaz": "Luis Suárez",
+        "L. Suárez": "Luis Suárez",
+        "Luis Suárez": "Luis Suárez",
+
+        "Cristiano Ronaldo dos Santos Aveiro": "Cristiano Ronaldo",
+        "Cristiano Ronaldo": "Cristiano Ronaldo",
+
+        "Nélson Cabral Semedo": "Nélson Semedo",
+        "Nélson Semedo": "Nélson Semedo",
+
+        "Marco Asensio Willemsen": "Marco Asensio",
+        "Marco Asensio": "Marco Asensio",
+
+        "José Paulo Bezzera Maciel Júnior": "Paulinho",
+        "Paulinho": "Paulinho",
+
+        "Lucas Vázquez Iglesias": "Lucas Vázquez",
+        "Lucas Vázquez": "Lucas Vázquez",
+
+        "Mateo Kovačić": "Mateo Kovačić",
+        "Mateo Kovacic": "Mateo Kovačić",
+        "M. Kovačić": "Mateo Kovačić",
+
+        "Francisco Alcácer García": "Paco Alcácer",
+        "Paco Alcácer": "Paco Alcácer",
+
+        "Ivan Rakitic": "Ivan Rakitic",
+        "Luka Modric": "Luka Modric",
+        
+        "Samuel Umtiti": "Samuel Umtiti",
+    }
+
+    return PLAYER_NAME_MAP_TO_OPTA
+
