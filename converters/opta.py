@@ -11,7 +11,7 @@ class OptaConverter(BaseProviderConverter):
 
         qualifiers_list = event.get("qualifiers", [])
         qualifiers_dict = {str(q.get("qualifier_id")): q.get("value") for q in qualifiers_list}
-        [str(q.get("qualifier_id")) for q in qualifiers_list]
+        #[str(q.get("qualifier_id")) for q in qualifiers_list]
 
         action = None
         if type_id == 1:
@@ -34,10 +34,14 @@ class OptaConverter(BaseProviderConverter):
                 action = "freekick_shot"
             else:
                 action = "shot"
+        elif type_id == 4:
+            foul_qualifiers = {"12","13"}
+            if foul_qualifiers & qualifiers_dict.keys():
+                action = "foul"
+
         else:
             action = {
                 3: "take_on",
-                4: "foul",
                 7: "tackle",
                 8: "interception",
                 12: "clearance",
@@ -86,16 +90,30 @@ class OptaConverter(BaseProviderConverter):
         return "other"
 
     def get_result(self, event, action, qualifiers):
+        """
+        Determina el resultado de una acción con lógica específica para disparos.
+        """
         outcome = str(event.get("outcome", "0"))
+        type_id = int(event.get("type_id", -1))
 
-        if action in ["shot", "freekick_shot", "penalty_shot"]:
-            if "28" in qualifiers:
+        # -- TIROS --
+        if action in {"shot", "freekick_shot", "penalty_shot"}:
+            if type_id in [13, 14]:  # Miss o Post
+                return "fail"
+            if "82" in qualifiers:
+                return "fail"
+            if "28" in qualifiers:  # Own goal
                 return "own_goal"
             return "success" if outcome == "1" else "fail"
 
-        elif action in ["pass", "cross", "freekick_short", "freekick_crossed", "corner_short", "corner_crossed"]:
+        # -- PASES --
+        elif action in {
+            "pass", "cross", "freekick_short", "freekick_crossed",
+            "corner_short", "corner_crossed", "throw_in"
+        }:
             return "success" if outcome == "1" else "fail"
 
+        # -- FALTAS Y TARJETAS --
         elif action == "foul":
             if "31" in qualifiers:
                 return "yellow_card"
@@ -104,5 +122,11 @@ class OptaConverter(BaseProviderConverter):
             elif "33" in qualifiers:
                 return "red_card"
             return "fail"
+        
+        elif action == "bad_touch":
+           return "fail"
 
-        return "success" if outcome == "1" else "fail"
+        # -- DEMÁS ACCIONES --
+        else:
+            return "success" if outcome == "1" else "fail"
+
