@@ -11,7 +11,7 @@ class OptaConverter(BaseProviderConverter):
 
         qualifiers_list = event.get("qualifiers", [])
         qualifiers_dict = {str(q.get("qualifier_id")): q.get("value") for q in qualifiers_list}
-        [str(q.get("qualifier_id")) for q in qualifiers_list]
+        #[str(q.get("qualifier_id")) for q in qualifiers_list]
 
         action = None
         if type_id == 1:
@@ -34,10 +34,14 @@ class OptaConverter(BaseProviderConverter):
                 action = "freekick_shot"
             else:
                 action = "shot"
+        elif type_id == 4:
+            foul_qualifiers = {"12","13"}
+            if foul_qualifiers & qualifiers_dict.keys():
+                action = "foul"
+
         else:
             action = {
                 3: "take_on",
-                4: "foul",
                 7: "tackle",
                 8: "interception",
                 12: "clearance",
