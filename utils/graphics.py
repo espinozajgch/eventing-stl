@@ -6,6 +6,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 from matplotlib.lines import Line2D
 from mplsoccer import Pitch
+import matplotlib.colors as mcolors
+from matplotlib import colormaps
 
 def plot_actions_per_minute(df_sb, df_op, df_ws):
     # Añadir columna Minute y Provider
@@ -309,3 +311,88 @@ def plot_all_action_symbols(df_all):
     plt.tight_layout()
     plt.subplots_adjust(bottom=-0.01, top=0.75)
     st.pyplot(fig)
+
+
+from matplotlib import colormaps
+from matplotlib.colors import Normalize, to_rgb, to_hex
+
+def aplicar_heatmap_solo_a_pct(df):
+    """
+    Aplica:
+    - Fondo tipo semáforo solo a fila '% Éxito'
+    - Texto blanco o negro según contraste con el fondo
+    - Texto en negrita
+    """
+    cmap = colormaps['RdYlGn']
+
+    def get_text_color(background_rgb):
+        # Calcula el brillo perceptual del color
+        r, g, b = background_rgb
+        brightness = (r * 299 + g * 587 + b * 114) / 1000
+        return 'black' if brightness > 0.6 else 'white'
+
+    def semaforo_pct(row):
+        estilos = []
+        if row.name[1] == '% Éxito':
+            norm = Normalize(vmin=row.min(), vmax=row.max())
+            for val in row:
+                if pd.notna(val):
+                    bg_rgb = to_rgb(cmap(norm(val)))
+                    bg_hex = to_hex(bg_rgb)
+                    text_color = get_text_color(bg_rgb)
+                    estilos.append(f'background-color: {bg_hex}; color: {text_color}; font-weight: bold')
+                else:
+                    estilos.append('')
+        else:
+            estilos = [''] * len(row)
+        return estilos
+
+    # Estilo y formato: 1 decimal para % Éxito
+    return df.style.apply(semaforo_pct, axis=1).format("{:.0f}")
+
+def resumen_porcentaje_exito(df_spadl, proveedor=None):
+    """
+    Genera un resumen con estructura:
+    Proveedor | Resultado (Éxito, Total, % Éxito) | pass | cross | shot | ...
+
+    Aplica semáforo SOLO a % Éxito por acción, devolviendo el DataFrame listo para Streamlit.
+    """
+
+    if proveedor:
+        df = df_spadl[df_spadl['Provider'] == proveedor]
+    else:
+        df = df_spadl.copy()
+
+    df['Success'] = df['Result'] == 'success'
+
+    # Calcular métricas por Provider y ActionType
+    grouped = df.groupby(['Provider', 'ActionType'])['Success'].agg(
+        Éxito='sum',
+        Total='count'
+    )
+    grouped['% Éxito'] = (grouped['Éxito'] / grouped['Total'] * 100).round(1)
+
+    # Reorganizar
+    df_final = (
+        grouped.stack()
+        .unstack(level=1)
+        .rename_axis(index=['Proveedor', 'Resultado'])
+        .sort_index(level=0)
+        .fillna(0)
+    )
+
+    # Orden fijo: Éxito, Total, % Éxito
+    orden_resultados = ['Éxito', 'Total', '% Éxito']
+    df_final = df_final.loc[
+        df_final.index.get_level_values('Resultado').isin(orden_resultados)
+    ]
+    df_final = df_final.reindex(
+        pd.MultiIndex.from_product(
+            [df_final.index.get_level_values(0).unique(), orden_resultados],
+            names=['Proveedor', 'Resultado']
+        )
+    ).fillna(0)
+
+    st.markdown("**Resumen SPADL con % Éxito por Acción**")
+    st.dataframe(aplicar_heatmap_solo_a_pct(df_final))
+

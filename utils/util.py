@@ -17,8 +17,6 @@ def generarMenu():
         st.page_link("pages/scout.py", label="ScoutingHub", icon=":material/contacts:")
         st.page_link("pages/advanced_stats.py", label="Advanced Stats", icon=":material/monitoring:")
 
-import streamlit as st
-
 def generate_spadl_filters(df):
     default_option = "Todos"
     df_filtered = df.copy()
