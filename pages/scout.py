@@ -52,6 +52,6 @@ with tab2:
         st.markdown("**Tabla de Acciones SPADL**")
         st.dataframe(df_filtered)
 
-st.divider()
-graphics.resumen_porcentaje_exito(df_filtered)
+    st.divider()
+    graphics.resumen_porcentaje_exito(df_filtered)
 
