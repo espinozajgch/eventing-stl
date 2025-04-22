@@ -16,6 +16,8 @@ class WyscoutConverter(BaseProviderConverter):
         # Detectar intercepción por tag 1401 antes de cualquier otra lógica
         if 1401 in tags:
             action = "interception"
+        if 1501 in tags:
+            action = "clearance"
 
         if action is None:
             if eid == 8:  # Pass
@@ -44,8 +46,8 @@ class WyscoutConverter(BaseProviderConverter):
                 action = "shot"
             elif eid == 2:
                 action = "foul"
-            elif eid == 7:
-                action = "clearance"
+            #elif eid == 7:
+            #    action = "clearance"
             elif eid == 9:
                 action = "keeper_save"
             elif eid == 1:
@@ -113,7 +115,7 @@ class WyscoutConverter(BaseProviderConverter):
         elif 1703 in tag_ids:
             return "second_yellow_card"
         elif 101 in tag_ids:
-            return "goal"
+            return "success"
         elif 102 in tag_ids:
             return "own_goal"
 
@@ -144,4 +146,4 @@ class WyscoutConverter(BaseProviderConverter):
             if 2000 in tag_ids:
                 return "success"
 
-        return "unknown"
+        return "fail"

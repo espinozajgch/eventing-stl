@@ -86,16 +86,30 @@ class OptaConverter(BaseProviderConverter):
         return "other"
 
     def get_result(self, event, action, qualifiers):
+        """
+        Determina el resultado de una acción con lógica específica para disparos.
+        """
         outcome = str(event.get("outcome", "0"))
+        type_id = int(event.get("type_id", -1))
 
-        if action in ["shot", "freekick_shot", "penalty_shot"]:
-            if "28" in qualifiers:
+        # -- TIROS --
+        if action in {"shot", "freekick_shot", "penalty_shot"}:
+            if type_id in [13, 14]:  # Miss o Post
+                return "fail"
+            if "82" in qualifiers:
+                return "fail"
+            if "28" in qualifiers:  # Own goal
                 return "own_goal"
             return "success" if outcome == "1" else "fail"
 
-        elif action in ["pass", "cross", "freekick_short", "freekick_crossed", "corner_short", "corner_crossed"]:
+        # -- PASES --
+        elif action in {
+            "pass", "cross", "freekick_short", "freekick_crossed",
+            "corner_short", "corner_crossed", "throw_in"
+        }:
             return "success" if outcome == "1" else "fail"
 
+        # -- FALTAS Y TARJETAS --
         elif action == "foul":
             if "31" in qualifiers:
                 return "yellow_card"
@@ -104,5 +118,11 @@ class OptaConverter(BaseProviderConverter):
             elif "33" in qualifiers:
                 return "red_card"
             return "fail"
+        
+        elif action == "bad_touch":
+           return "fail"
 
-        return "success" if outcome == "1" else "fail"
+        # -- DEMÁS ACCIONES --
+        else:
+            return "success" if outcome == "1" else "fail"
+
