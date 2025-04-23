@@ -25,7 +25,7 @@ with col2:
 with col3:
     st.metric(f":green[Wyscout]","2017/18", border=True)
 
-#st.divider()
+st.divider()
 
 df_sb, df_op, df_ws, df_all = connection.get_df()
 
