@@ -27,40 +27,66 @@ def generate_spadl_filters(df):
     # --- FILTRO POR PROVEEDOR ---
     with provider_col:
         provider_options = df['Provider'].dropna().astype(str).str.strip().sort_values().unique().tolist()
-        prev_provider = st.session_state.get("selected_provider", default_option)
-        provider = st.selectbox("PROVEEDOR", options=[default_option] + provider_options, index=([default_option] + provider_options).index(prev_provider) if prev_provider in provider_options else 0)
-        st.session_state["selected_provider"] = provider
+        provider = st.selectbox(
+            "PROVEEDOR",
+            options=[default_option] + provider_options,
+            key="selected_provider"
+        )
         if provider != default_option:
-            df_filtered = df_filtered[df_filtered['Provider'] == provider]
+            df_filtered = df_filtered[df_filtered['Provider'].astype(str).str.strip() == provider]
 
     # --- FILTRO POR EQUIPO ---
     with team_col:
         team_options = df_filtered['Team'].dropna().astype(str).str.strip().sort_values().unique().tolist()
-        prev_team = st.session_state.get("selected_team", default_option)
-        team = st.selectbox("EQUIPO", options=[default_option] + team_options, index=([default_option] + team_options).index(prev_team) if prev_team in team_options else 0)
-        st.session_state["selected_team"] = team
+        team = st.selectbox(
+            "EQUIPO",
+            options=[default_option] + team_options,
+            key="selected_team"
+        )
         if team != default_option:
-            df_filtered = df_filtered[df_filtered['Team'] == team]
+            df_filtered = df_filtered[df_filtered['Team'].astype(str).str.strip() == team]
 
     # --- FILTRO POR JUGADOR ---
     with player_col:
         player_options = df_filtered['Player'].dropna().astype(str).str.strip().sort_values().unique().tolist()
-        prev_player = st.session_state.get("selected_player", default_option)
-        player = st.selectbox("JUGADOR", options=[default_option] + player_options, index=([default_option] + player_options).index(prev_player) if prev_player in player_options else 0)
-        st.session_state["selected_player"] = player
+        player = st.selectbox(
+            "JUGADOR",
+            options=[default_option] + player_options,
+            key="selected_player"
+        )
         if player != default_option:
-            df_filtered = df_filtered[df_filtered['Player'] == player]
+            df_filtered = df_filtered[df_filtered['Player'].astype(str).str.strip() == player]
 
     # --- FILTRO POR ACCIÓN ---
     with action_col:
         action_options = df_filtered['ActionType'].dropna().astype(str).str.strip().sort_values().unique().tolist()
-        prev_action = st.session_state.get("selected_action", default_option)
-        action = st.selectbox("ACCIÓN SPADL", options=[default_option] + action_options, index=([default_option] + action_options).index(prev_action) if prev_action in action_options else 0)
-        st.session_state["selected_action"] = action
+        action_options = [default_option] + action_options
+
+        # Verifica si la acción seleccionada aún existe, si no, resetear a "Todos"
+        current_action = st.session_state.get("selected_action", default_option)
+        print(current_action)
+        
+        if current_action not in action_options:
+            st.session_state["selected_action"] = default_option
+            current_action = default_option
+
+        #print(current_action)
+        #print(action_options.index(current_action))
+        
+        # Ahora renderiza el selectbox usando el valor actual válido
+        action = st.selectbox(
+            "ACCIÓN SPADL",
+            options=action_options,
+            index=action_options.index(current_action),
+            key="selected_action"
+        )
+
+        #print(action)
         if action != default_option:
-            df_filtered = df_filtered[df_filtered['ActionType'] == action]
+            df_filtered = df_filtered[df_filtered['ActionType'].astype(str).str.strip() == action]
 
     return df_filtered
+
 
 
 def get_player_map():

@@ -45,6 +45,7 @@ class WyscoutConverter(BaseProviderConverter):
             elif eid == 10:
                 action = "shot"
             elif eid == 2:
+                #if sub == "foul":
                 action = "foul"
             #elif eid == 7:
             #    action = "clearance"

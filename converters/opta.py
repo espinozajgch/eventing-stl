@@ -35,10 +35,10 @@ class OptaConverter(BaseProviderConverter):
             else:
                 action = "shot"
         elif type_id == 4:
-            foul_qualifiers = {"12","13"}
-            if foul_qualifiers & qualifiers_dict.keys():
+            outcome = str(event.get("outcome", "0"))
+            if outcome == "0":
                 action = "foul"
-
+            
         else:
             action = {
                 3: "take_on",
