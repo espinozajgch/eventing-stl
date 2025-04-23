@@ -70,9 +70,6 @@ def generate_spadl_filters(df):
             st.session_state["selected_action"] = default_option
             current_action = default_option
 
-        #print(current_action)
-        #print(action_options.index(current_action))
-        
         # Ahora renderiza el selectbox usando el valor actual válido
         action = st.selectbox(
             "ACCIÓN SPADL",
@@ -81,13 +78,11 @@ def generate_spadl_filters(df):
             key="selected_action"
         )
 
-        #print(action)
         if action != default_option:
             df_filtered = df_filtered[df_filtered['ActionType'].astype(str).str.strip() == action]
 
+    df_filtered = df_filtered.reset_index(drop=True)
     return df_filtered
-
-
 
 def get_player_map():
     PLAYER_NAME_MAP_TO_OPTA = {

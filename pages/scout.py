@@ -17,8 +17,19 @@ df_sb, df_op, df_ws, df_all = connection.get_df()
 
 st.header(":material/contacts: :blue[ScoutingHub]", divider=True)
 
+df_all["Min"] = df_all["StartTime"].apply(
+    lambda x: f"{int(x) // 60:02d}:{int(x) % 60:02d}"
+)
+
+# Reordenar columnas para que MinSeg esté primero
+cols = df_all.columns.tolist()
+cols.insert(0, cols.pop(cols.index("Provider")))
+cols.insert(1, cols.pop(cols.index("Min")))
+df_all = df_all[cols]
+
 df_datos_filtrado = util.generate_spadl_filters(df_all)
-#st.dataframe(df_datos_filtrado)
+#st.dataframe(df_all)
+
 
 if not df_datos_filtrado.empty:
     # --- FILTRO POR MINUTOS ---
@@ -52,6 +63,7 @@ if not df_datos_filtrado.empty:
             graphics.plot_spadl_action_heatmap(df_filtered)
         with col2:
             st.markdown("**Tabla de Acciones SPADL**")
+            # 🔽 AÑADIR AQUÍ LA NUEVA COLUMNA
             st.dataframe(df_filtered)
 
         st.divider()
